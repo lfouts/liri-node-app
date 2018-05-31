@@ -8,10 +8,12 @@ var fs = require('fs');
 var arg = "";
 
 arg = process.argv[3];
-
+//node commands
 parseCommand(process.argv[2], arg);
 
 function parseCommand(command, arg) {
+	console.log(command);
+	console.log(arg);
 	switch (command) {
 
 	case "my-tweets":
@@ -32,28 +34,27 @@ function parseCommand(command, arg) {
 
 	case undefined:
 	case "":
-		console.log("Did you say something? I couldn't quite hear. Try talking a bit louder.");
 		break;
 
 	default:
-		console.log("I'm sorry, but I'm not sure what you mean by that. Are you sure that was a valid command?");
+		console.log("Are you sure that was a valid command?");
 		break;
 
 	}
 };
-
+//tweets portion
 function getTweets() {
-	console.log("Please wait while I find your tweets.\n");
+	console.log("Tweets are coming.\n");
 	var twitter = new Twitter(keys.twitterKeys);
 	twitter.get('statuses/home_timeline', function(error, tweets, response) {
 		if (tweets.length < 1) {
-			console.log("I couldn't find any tweets from your account. Try again after you've tweeted something.");
+			console.log("You don't have any tweets. Try tweeting somethin'.");
 			return;
 		}
 		if (tweets.length === 1) {
-			console.log("Here is your only tweet:\n");
+			console.log("Here is your one and only tweet:\n");
 		} else {
-			console.log("Here are your " + tweets.length + " most recent tweets:\n");
+			console.log("Here are my " + tweets.length + " most recent tweets:\n");
 		}
 
 		for (var i = 0; i < tweets.length; i++) {
@@ -78,17 +79,17 @@ function getTweets() {
 		}
 	});
 };
-
+//spotify portion
 function spotifySong(song) {
 	song = (song || "The Sign");
+	//keeps trying to find a song by harry styles?  HALP PLEASE :(
 	console.log("Hold a sec, I'm finding that song.\n");
 	var spotify = new Spotify(keys.spotifyKeys);
 	spotify.search({ type: 'track', query: "track:" + song, limit: 20 })
 	.then(function(response) {
 		var foundSong = false;
 		for (var i = 0; i < response.tracks.items.length; i++) {
-			if (response.tracks.items[i].name.toLowerCase() === song.toLowerCase()) {
-				console.log("I believe I found the song you were looking for. Here's more info on it:\n");
+				console.log("Here's that song:\n");
 				if (response.tracks.items[i].artists.length > 0) {
 					var artists = response.tracks.items[i].artists.length > 1 ? "  Artists: " : "  Artist: ";
 					for (var j = 0; j < response.tracks.items[i].artists.length; j++) {
@@ -105,7 +106,7 @@ function spotifySong(song) {
 
 				foundSong = true;
 				break;
-			}
+
 		}
 		if (!foundSong) {
 			console.log("Sorry dude, I couldn't find any songs called '" + song + "' on Spotify.");
@@ -118,8 +119,8 @@ function spotifySong(song) {
 
 function movieInfo(movie) {
 	movie = movie || "Mr. Nobody";
-	var queryUrl = "https://www.omdbapi.com/?apikey=40e9cece&s=" + movie; // using search because sometimes just getting a movie by name gives strange results
-	console.log("Please wait while I find that movie.\n");
+	var queryUrl = "https://www.omdbapi.com/?apikey=40e9cece&s=" + movie;
+	console.log("Hold on while I find that movie.\n");
 	request(queryUrl, function (error, response, body) {
 		if (error) {
 			console.log("Oh noes, I'm broken.\n  " + error);
@@ -128,17 +129,17 @@ function movieInfo(movie) {
 		if (body && JSON.parse(body).Search && JSON.parse(body).Search.length > 0) {
 			for (var i = 0; i < JSON.parse(body).Search.length; i++) {
 				var result = JSON.parse(body).Search[i];
-				if (result.Title.toLowerCase() === movie.toLowerCase()) {
+
 		            var cont = false;
 					var innerQueryURL = "https://www.omdbapi.com/?i=" + result.imdbID + "&apikey=e321a58a";
-					request(innerQueryURL, function (error, response, body) { // another request because the search result doesn't give enough information
+					request(innerQueryURL, function (error, response, body) {
 						if (error) {
 							console.log("Oh noes, I'm broken.\n  " + error);
 							return;
 						}
 						if (body && JSON.parse(body) && JSON.parse(body).Response === "True") {
 							body = JSON.parse(body);
-							console.log("I believe I found the movie you were looking for. Here's more info on it:\n");
+							console.log("Here's that movie:\n");
 							console.log("  Title: " + body.Title);
 							console.log("  Year: " + body.Year);
 							for (var j = 0; j < body.Ratings.length; j++) {
@@ -160,7 +161,7 @@ function movieInfo(movie) {
 						continue;
 					}
 					return;
-				}
+
 			}
 			var result = JSON.parse(body).Search[0];
 			var innerQueryURL = "https://www.omdbapi.com/?i=" + result.imdbID + "&apikey=4e321a58a";
@@ -172,7 +173,7 @@ function movieInfo(movie) {
 				}
 				if (body && JSON.parse(body) && JSON.parse(body).Response === "True") {
 					body = JSON.parse(body);
-					console.log("I couldn't find any movies with that title. This was the closest I could find:\n");
+					console.log("I couldn't find any movies with that name. This was the closest I could find:\n");
 					console.log("  Title: " + body.Title);
 					console.log("  Year: " + body.Year);
 					for (var j = 0; j < body.Ratings.length; j++) {
@@ -194,7 +195,7 @@ function movieInfo(movie) {
 				return;
 			}
 		} else {
-			console.log("I'm sorry, I wasn't able to find any movie called '" + movie + "'. Try a different one");
+			console.log("I wasn't able to find any movie called '" + movie + "'. Try a new search");
 		}
 	});
 };
@@ -205,6 +206,6 @@ function parseFileCommand() {
 			return console.log("Oh noes, I'm broken\n  " + error);
 		}
 		var dataArr = data.split(",");
-		parseCommand(dataArr[0], dataArr[1].replace(/"/g, ""));
+		parseCommand(dataArr[0], dataArr[1]);
 	});
 };
